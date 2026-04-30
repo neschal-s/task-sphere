@@ -74,6 +74,25 @@ const ProjectDetail = () => {
 
   const isAdmin = project?.members.some(m => m.userId._id === user?.id && m.role === 'Admin');
 
+  const handleUpdateTaskStatus = async (taskId, newStatus) => {
+    try {
+      await axios.put(`/api/tasks/${taskId}`, { status: newStatus });
+      fetchProjectAndTasks();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update task status');
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    try {
+      await axios.delete(`/api/tasks/${taskId}`);
+      fetchProjectAndTasks();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete task');
+    }
+  };
+
   if (loading) return <Layout><div>Loading...</div></Layout>;
   if (!project) return <Layout><div>Project not found</div></Layout>;
 
