@@ -1,6 +1,13 @@
 const express = require('express');
+const { signup, login } = require('../controllers/authController');
+const { signupValidators, loginValidators, validate } = require('../utils/validators');
+
 const router = express.Router();
 
-// Auth routes will be implemented in Phase 3
+// POST /api/auth/signup
+router.post('/signup', signupValidators, validate, signup);
+
+// POST /api/auth/login
+router.post('/login', loginValidators, validate, login);
 
 module.exports = router;

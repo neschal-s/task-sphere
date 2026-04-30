@@ -1,6 +1,13 @@
 const express = require('express');
+const authMiddleware = require('../middleware/auth');
+const { getDashboardStats } = require('../controllers/dashboardController');
+
 const router = express.Router();
 
-// Dashboard routes will be implemented in Phase 6
+// All routes require authentication
+router.use(authMiddleware);
+
+// GET /api/dashboard/stats - Get dashboard statistics
+router.get('/stats', getDashboardStats);
 
 module.exports = router;
