@@ -158,9 +158,9 @@ const Notifications = () => {
                       {notif.type === 'added_to_project' && '👥'}
                       {notif.type === 'new_task' && '✅'}
                       {notif.type === 'task_updated' && '📝'}
-                      {notif.type === 'status_change_requested' && '📋'}
-                      {notif.type === 'status_change_approved' && '✔️'}
-                      {notif.type === 'status_change_rejected' && '❌'}
+                      {notif.type === 'status_change_request' && '⏳'}
+                      {notif.type === 'status_change_approved' && '✓'}
+                      {notif.type === 'status_change_rejected' && '✗'}
                       {' ' + notif.message}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: '#999' }}>

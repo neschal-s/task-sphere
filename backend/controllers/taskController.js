@@ -103,7 +103,7 @@ const getMyTasks = async (req, res, next) => {
   }
 };
 
-// Update task
+// Update task (Admin only for direct status changes, members must request)
 const updateTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
@@ -115,17 +115,14 @@ const updateTask = async (req, res, next) => {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    // Check if user has permission to update task
-    // Permission: if assigned to user OR if user created the task OR if user is project admin
     const project = await Project.findById(task.projectId);
     const isProjectAdmin = project.members.some(
       m => m.userId.toString() === userId && m.role === 'Admin'
     );
-    const isAssignedToUser = task.assignedTo?.toString() === userId;
-    const isTaskCreator = task.createdBy.toString() === userId;
 
-    if (!isProjectAdmin && !isAssignedToUser && !isTaskCreator) {
-      return res.status(403).json({ error: 'Access denied' });
+    // Only admin can update tasks directly
+    if (!isProjectAdmin) {
+      return res.status(403).json({ error: 'Only project admins can update tasks' });
     }
 
     // Update fields
@@ -136,9 +133,139 @@ const updateTask = async (req, res, next) => {
     if (dueDate !== undefined) task.dueDate = dueDate;
     if (assignedTo !== undefined) task.assignedTo = assignedTo;
 
+    // Clear pending status change if any
+    task.pendingStatusChange = undefined;
+
     await task.save();
     await task.populate('assignedTo');
     await task.populate('createdBy');
+    await task.populate('pendingStatusChange.requestedBy');
+
+    res.json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Request status change (Members request, Admin approves)
+const requestStatusChange = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    const { newStatus } = req.body;
+    const userId = req.user.userId;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Check if user is a project member
+    const project = await Project.findById(task.projectId);
+    const isMember = project.members.some(m => m.userId.toString() === userId);
+    if (!isMember) {
+      return res.status(403).json({ error: 'You are not a member of this project' });
+    }
+
+    // Members cannot request same status as current
+    if (newStatus === task.status) {
+      return res.status(400).json({ error: 'Task already has this status' });
+    }
+
+    // Create pending status change request
+    task.pendingStatusChange = {
+      requestedBy: userId,
+      requestedStatus: newStatus,
+      requestedAt: new Date(),
+    };
+
+    await task.save();
+    await task.populate('requestedBy', 'name email');
+    await task.populate('assignedTo');
+    await task.populate('createdBy');
+    await task.populate('pendingStatusChange.requestedBy');
+
+    // Notify project admins
+    const admins = project.members.filter(m => m.role === 'Admin');
+    const user = await require('../models/User').findById(userId);
+    
+    for (const admin of admins) {
+      const notification = new Notification({
+        userId: admin.userId,
+        type: 'status_change_request',
+        projectId: project._id,
+        taskId: task._id,
+        message: `${user.name} is requesting to change "${task.title}" status to "${newStatus}"`
+      });
+      await notification.save();
+    }
+
+    res.json(task);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Approve or reject status change (Admin only)
+const approveStatusChange = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    const { approve } = req.body;
+    const userId = req.user.userId;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    if (!task.pendingStatusChange || !task.pendingStatusChange.requestedBy) {
+      return res.status(400).json({ error: 'No pending status change for this task' });
+    }
+
+    // Check if user is project admin
+    const project = await Project.findById(task.projectId);
+    const isProjectAdmin = project.members.some(
+      m => m.userId.toString() === userId && m.role === 'Admin'
+    );
+
+    if (!isProjectAdmin) {
+      return res.status(403).json({ error: 'Only project admins can approve status changes' });
+    }
+
+    const requesterUser = await require('../models/User').findById(task.pendingStatusChange.requestedBy);
+    const admin = await require('../models/User').findById(userId);
+
+    if (approve) {
+      // Approve the status change
+      task.status = task.pendingStatusChange.requestedStatus;
+      
+      // Notify requester that their request was approved
+      const notification = new Notification({
+        userId: task.pendingStatusChange.requestedBy,
+        type: 'status_change_approved',
+        projectId: project._id,
+        taskId: task._id,
+        message: `${admin.name} approved your status change for "${task.title}" to "${task.status}"`
+      });
+      await notification.save();
+    } else {
+      // Reject the status change
+      const notification = new Notification({
+        userId: task.pendingStatusChange.requestedBy,
+        type: 'status_change_rejected',
+        projectId: project._id,
+        taskId: task._id,
+        message: `${admin.name} rejected your status change request for "${task.title}"`
+      });
+      await notification.save();
+    }
+
+    // Clear pending status change
+    task.pendingStatusChange = undefined;
+    await task.save();
+
+    await task.populate('assignedTo');
+    await task.populate('createdBy');
+    await task.populate('pendingStatusChange.requestedBy');
 
     res.json(task);
   } catch (error) {
@@ -181,4 +308,6 @@ module.exports = {
   getMyTasks,
   updateTask,
   deleteTask,
+  requestStatusChange,
+  approveStatusChange,
 };

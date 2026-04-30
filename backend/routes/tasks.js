@@ -7,6 +7,8 @@ const {
   getMyTasks,
   updateTask,
   deleteTask,
+  requestStatusChange,
+  approveStatusChange,
 } = require('../controllers/taskController');
 
 const router = express.Router();
@@ -42,6 +44,20 @@ router.get('/my-tasks', getMyTasks);
 
 // GET /api/tasks/project - Get tasks by project
 router.get('/project', getTasksByProject);
+
+// POST /api/tasks/:taskId/request-status-change - Request status change (members)
+router.post('/:taskId/request-status-change',
+  body('newStatus').isIn(['To Do', 'In Progress', 'Done']).withMessage('Invalid status'),
+  validate,
+  requestStatusChange
+);
+
+// PATCH /api/tasks/:taskId/approve-status-change - Approve status change (admin)
+router.patch('/:taskId/approve-status-change',
+  body('approve').isBoolean().withMessage('Approve field must be boolean'),
+  validate,
+  approveStatusChange
+);
 
 // PUT /api/tasks/:taskId - Update a task
 router.put('/:taskId',

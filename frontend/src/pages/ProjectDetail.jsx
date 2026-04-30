@@ -22,11 +22,6 @@ const ProjectDetail = () => {
     dueDate: '',
     priority: 'Medium'
   });
-  const [showStatusRequest, setShowStatusRequest] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [requestedStatus, setRequestedStatus] = useState('');
-  const [statusReason, setStatusReason] = useState('');
-  const [pendingRequests, setPendingRequests] = useState([]);
 
   useEffect(() => {
     fetchProjectAndTasks();
@@ -41,25 +36,10 @@ const ProjectDetail = () => {
       ]);
       setProject(projectRes.data);
       setTasks(tasksRes.data);
-      
-      // Fetch pending requests if admin
-      const isAdmin = projectRes.data.members.some(m => m.userId._id === user?.id && m.role === 'Admin');
-      if (isAdmin) {
-        fetchPendingRequests();
-      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to load project');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchPendingRequests = async () => {
-    try {
-      const res = await axios.get(`/api/status-requests/pending/${projectId}`);
-      setPendingRequests(res.data);
-    } catch (err) {
-      console.log('No pending requests or error fetching');
     }
   };
 
@@ -97,10 +77,25 @@ const ProjectDetail = () => {
 
   const handleUpdateTaskStatus = async (taskId, newStatus) => {
     try {
-      await axios.put(`/api/tasks/${taskId}`, { status: newStatus });
+      if (isAdmin) {
+        // Admin can directly update
+        await axios.put(`/api/tasks/${taskId}`, { status: newStatus });
+      } else {
+        // Member must request
+        await axios.post(`/api/tasks/${taskId}/request-status-change`, { newStatus });
+      }
       fetchProjectAndTasks();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update task status');
+    }
+  };
+
+  const handleApproveStatusChange = async (taskId, approve) => {
+    try {
+      await axios.patch(`/api/tasks/${taskId}/approve-status-change`, { approve });
+      fetchProjectAndTasks();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to process status change');
     }
   };
 
@@ -111,63 +106,6 @@ const ProjectDetail = () => {
       fetchProjectAndTasks();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to delete task');
-    }
-  };
-
-  const handleRequestStatusChange = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('/api/status-requests', {
-        taskId: selectedTask._id,
-        projectId,
-        requestedStatus,
-        reason: statusReason
-      });
-      setShowStatusRequest(false);
-      setSelectedTask(null);
-      setRequestedStatus('');
-      setStatusReason('');
-      alert('Status change request submitted successfully!');
-      fetchProjectAndTasks();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit status request');
-    }
-  };
-
-  const handleApproveRequest = async (requestId) => {
-    try {
-      await axios.patch(`/api/status-requests/${requestId}/approve`, {
-        approvalReason: ''
-      });
-      alert('Status change approved!');
-      fetchPendingRequests();
-      fetchProjectAndTasks();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to approve request');
-    }
-  };
-
-  const handleRejectRequest = async (requestId) => {
-    try {
-      const reason = prompt('Enter rejection reason (optional):');
-      await axios.patch(`/api/status-requests/${requestId}/reject`, {
-        rejectionReason: reason || ''
-      });
-      alert('Status change rejected!');
-      fetchPendingRequests();
-      fetchProjectAndTasks();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to reject request');
-    }
-  };
-
-  const handleRemoveMember = async (memberId) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return;
-    try {
-      await axios.delete(`/api/projects/${projectId}/members/${memberId}`);
-      fetchProjectAndTasks();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to remove member');
     }
   };
 
@@ -191,30 +129,9 @@ const ProjectDetail = () => {
                 padding: '0.75rem 1rem',
                 background: 'white',
                 border: '1px solid #ddd',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+                borderRadius: '4px'
               }}>
-                <div>
-                  <strong>{m.userId.name}</strong> <span style={{ color: '#999' }}>({m.role})</span>
-                </div>
-                {isAdmin && m.userId._id !== user?.id && (
-                  <button
-                    onClick={() => handleRemoveMember(m.userId._id)}
-                    style={{
-                      background: '#e74c3c',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      padding: '0.25rem 0.5rem',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem'
-                    }}
-                  >
-                    Remove
-                  </button>
-                )}
+                <strong>{m.userId.name}</strong> <span style={{ color: '#999' }}>({m.role})</span>
               </div>
             ))}
           </div>
@@ -258,69 +175,6 @@ const ProjectDetail = () => {
             </form>
           )}
         </section>
-
-        {/* Pending Status Requests Section (Admin Only) */}
-        {isAdmin && pendingRequests.length > 0 && (
-          <section style={{ marginBottom: '2rem', padding: '1rem', background: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107' }}>
-            <h2>Pending Status Change Requests ({pendingRequests.length})</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {pendingRequests.map(request => (
-                <div
-                  key={request._id}
-                  style={{
-                    padding: '1rem',
-                    background: 'white',
-                    border: '1px solid #ffc107',
-                    borderRadius: '4px'
-                  }}
-                >
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    <strong>{request.requestedBy.name}</strong> requested to change
-                    <strong> "{request.taskId.title}"</strong> status from
-                    <strong> "{request.currentStatus}"</strong> to
-                    <strong> "{request.requestedStatus}"</strong>
-                  </div>
-                  {request.reason && (
-                    <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
-                      Reason: {request.reason}
-                    </div>
-                  )}
-                  <div style={{ fontSize: '0.85rem', color: '#999', marginBottom: '0.75rem' }}>
-                    {new Date(request.createdAt).toLocaleString()}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => handleApproveRequest(request._id)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        background: '#27ae60',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleRejectRequest(request._id)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        background: '#e74c3c',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Tasks Section */}
         <section>
@@ -402,10 +256,11 @@ const ProjectDetail = () => {
                 key={task._id}
                 style={{
                   padding: '1rem',
-                  border: '1px solid #ddd',
+                  border: `2px solid ${task.pendingStatusChange ? '#f39c12' : '#ddd'}`,
                   borderRadius: '8px',
                   borderLeft: `4px solid ${task.status === 'Done' ? '#27ae60' : task.status === 'In Progress' ? '#f39c12' : '#ccc'}`,
-                  position: 'relative'
+                  position: 'relative',
+                  background: task.pendingStatusChange ? '#fffbf0' : 'white'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -447,128 +302,87 @@ const ProjectDetail = () => {
                         <option>Done</option>
                       </select>
                     ) : (
-                      <>
-                        <span style={{ marginLeft: '0.5rem', fontWeight: 'bold' }}>{task.status}</span>
-                        <button
-                          onClick={() => {
-                            setSelectedTask(task);
-                            setShowStatusRequest(true);
-                          }}
-                          style={{
-                            marginLeft: '0.5rem',
-                            padding: '0.25rem 0.5rem',
-                            background: '#3498db',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          Request Change
-                        </button>
-                      </>
+                      <select
+                        defaultValue=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleUpdateTaskStatus(task._id, e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                        style={{
+                          padding: '0.25rem',
+                          marginLeft: '0.5rem',
+                          borderRadius: '4px',
+                          border: '1px solid #ddd'
+                        }}
+                      >
+                        <option value="">Request Status Change</option>
+                        <option value="To Do">To Do</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                      </select>
                     )}
+                    <span style={{ marginLeft: '0.5rem', fontWeight: 'bold', color: task.status === 'Done' ? '#27ae60' : task.status === 'In Progress' ? '#f39c12' : '#3498db' }}>
+                      {task.status}
+                    </span>
                   </div>
                   <p>Priority: <strong>{task.priority}</strong></p>
                   {task.dueDate && <p>Due: {new Date(task.dueDate).toLocaleDateString()}</p>}
                   {task.assignedTo && <p>Assigned to: {task.assignedTo.name}</p>}
                 </div>
+
+                {/* Pending Status Change Request (for Admin) */}
+                {isAdmin && task.pendingStatusChange && task.pendingStatusChange.requestedBy && (
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '0.75rem',
+                    background: '#fff3cd',
+                    border: '1px solid #ffc107',
+                    borderRadius: '4px'
+                  }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
+                      ⏳ Status Change Request
+                    </p>
+                    <p style={{ margin: '0 0 0.5rem 0' }}>
+                      <strong>{task.pendingStatusChange.requestedBy.name}</strong> is requesting to change status to <strong>"{task.pendingStatusChange.requestedStatus}"</strong>
+                    </p>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => handleApproveStatusChange(task._id, true)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#27ae60',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        ✓ Approve
+                      </button>
+                      <button
+                        onClick={() => handleApproveStatusChange(task._id, false)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#e74c3c',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        ✗ Reject
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </section>
-
-        {/* Status Change Request Modal */}
-        {showStatusRequest && selectedTask && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              background: 'white',
-              padding: '2rem',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '90%',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}>
-              <h3>Request Status Change</h3>
-              <form onSubmit={handleRequestStatusChange}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <p><strong>Task:</strong> {selectedTask.title}</p>
-                  <p><strong>Current Status:</strong> {selectedTask.status}</p>
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label>Request New Status:</label>
-                  <select
-                    value={requestedStatus}
-                    onChange={(e) => setRequestedStatus(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
-                  >
-                    <option value="">Select status</option>
-                    <option value="To Do">To Do</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Done">Done</option>
-                  </select>
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label>Reason (optional):</label>
-                  <textarea
-                    value={statusReason}
-                    onChange={(e) => setStatusReason(e.target.value)}
-                    placeholder="Explain why you want to change the status..."
-                    maxLength={500}
-                    style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem', minHeight: '80px' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowStatusRequest(false);
-                      setSelectedTask(null);
-                      setRequestedStatus('');
-                      setStatusReason('');
-                    }}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: '#999',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: '#27ae60',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Submit Request
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
 
         {/* Chat Section */}
         <Chat projectId={projectId} />

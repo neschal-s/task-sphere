@@ -38,6 +38,17 @@ const taskSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    pendingStatusChange: {
+      requestedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      requestedStatus: {
+        type: String,
+        enum: ['To Do', 'In Progress', 'Done'],
+      },
+      requestedAt: Date,
+    },
   },
   { timestamps: true }
 );
