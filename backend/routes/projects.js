@@ -1,5 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
+const { body, validationResult } = require('express-validator');
 const {
   createProject,
   getUserProjects,
@@ -7,15 +8,31 @@ const {
   addMember,
   removeMember,
 } = require('../controllers/projectController');
-const { createProjectValidators, validate } = require('../utils/validators');
 
 const router = express.Router();
+
+// Validation middleware
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      error: 'Validation failed', 
+      details: errors.array().map(e => ({ field: e.param, message: e.msg }))
+    });
+  }
+  next();
+};
 
 // All routes require authentication
 router.use(authMiddleware);
 
 // POST /api/projects - Create a new project
-router.post('/', createProjectValidators, validate, createProject);
+router.post('/',
+  body('name').trim().notEmpty().withMessage('Project name is required'),
+  body('description').optional().trim(),
+  validate,
+  createProject
+);
 
 // GET /api/projects - Get all projects for the user
 router.get('/', getUserProjects);

@@ -2,32 +2,48 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Layout from './components/Layout';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import Projects from './pages/Projects';
+import CreateProject from './pages/CreateProject';
+import ProjectDetail from './pages/ProjectDetail';
+import Dashboard from './pages/Dashboard';
 
 const App = () => {
   return (
     <Router>
       <AuthProvider>
         <Routes>
+          {/* Public routes */}
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           
-          {/* Protected routes will be added here in Phase 7+ */}
+          {/* Protected routes */}
           <Route path="/" element={<Navigate to="/projects" replace />} />
           
-          {/* Placeholder for future protected routes */}
           <Route
             path="/projects"
             element={
               <ProtectedRoute>
-                <Layout>
-                  <div style={{ textAlign: 'center', padding: '2rem' }}>
-                    <h1>🚧 Projects Page - Coming Soon</h1>
-                    <p>This page will display your projects.</p>
-                  </div>
-                </Layout>
+                <Projects />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/create-project"
+            element={
+              <ProtectedRoute>
+                <CreateProject />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/project/:projectId"
+            element={
+              <ProtectedRoute>
+                <ProjectDetail />
               </ProtectedRoute>
             }
           />
@@ -36,12 +52,7 @@ const App = () => {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Layout>
-                  <div style={{ textAlign: 'center', padding: '2rem' }}>
-                    <h1>🚧 Dashboard - Coming Soon</h1>
-                    <p>This page will display your task statistics.</p>
-                  </div>
-                </Layout>
+                <Dashboard />
               </ProtectedRoute>
             }
           />

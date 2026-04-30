@@ -1,5 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middleware/auth');
+const { body, validationResult } = require('express-validator');
 const {
   createTask,
   getTasksByProject,
@@ -7,24 +8,49 @@ const {
   updateTask,
   deleteTask,
 } = require('../controllers/taskController');
-const { createTaskValidators, updateTaskValidators, validate } = require('../utils/validators');
 
 const router = express.Router();
+
+// Validation middleware
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      error: 'Validation failed', 
+      details: errors.array().map(e => ({ field: e.param, message: e.msg }))
+    });
+  }
+  next();
+};
 
 // All routes require authentication
 router.use(authMiddleware);
 
 // POST /api/tasks - Create a new task
-router.post('/', createTaskValidators, validate, createTask);
+router.post('/',
+  body('title').trim().notEmpty().withMessage('Task title is required'),
+  body('description').optional().trim(),
+  body('dueDate').optional().isISO8601().withMessage('Invalid date format'),
+  body('priority').optional().isIn(['Low', 'Medium', 'High']).withMessage('Invalid priority'),
+  body('projectId').notEmpty().withMessage('Project ID is required'),
+  validate,
+  createTask
+);
+
+// GET /api/tasks/my-tasks - Get tasks assigned to the user (must be before /:taskId route)
+router.get('/my-tasks', getMyTasks);
 
 // GET /api/tasks/project - Get tasks by project
 router.get('/project', getTasksByProject);
 
-// GET /api/tasks/my-tasks - Get tasks assigned to the user
-router.get('/my-tasks', getMyTasks);
-
 // PUT /api/tasks/:taskId - Update a task
-router.put('/:taskId', updateTaskValidators, validate, updateTask);
+router.put('/:taskId',
+  body('title').optional().trim(),
+  body('status').optional().isIn(['To Do', 'In Progress', 'Done']).withMessage('Invalid status'),
+  body('priority').optional().isIn(['Low', 'Medium', 'High']).withMessage('Invalid priority'),
+  validate,
+  updateTask
+);
 
 // DELETE /api/tasks/:taskId - Delete a task
 router.delete('/:taskId', deleteTask);

@@ -14,6 +14,12 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Add request logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
@@ -23,6 +29,12 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Backend is running', timestamp: new Date() });
+});
+
+// Error logging middleware (before error handler)
+app.use((err, req, res, next) => {
+  console.error('[ERROR]', err);
+  next(err);
 });
 
 // Error handling middleware (must be last)
