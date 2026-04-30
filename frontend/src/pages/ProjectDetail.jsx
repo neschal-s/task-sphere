@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../utils/axiosConfig';
 import { AuthContext } from '../context/AuthContext';
 import Layout from '../components/Layout';
+import Chat from '../components/Chat';
 
 const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -292,6 +293,9 @@ const ProjectDetail = () => {
             ))}
           </div>
         </section>
+
+        {/* Chat Section */}
+        <Chat projectId={projectId} />
       </div>
     </Layout>
   );

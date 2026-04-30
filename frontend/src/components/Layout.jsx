@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import Notifications from './Notifications';
 
 const Layout = ({ children }) => {
   const { user, logout } = useContext(AuthContext);
@@ -36,6 +37,7 @@ const Layout = ({ children }) => {
         </div>
         {user && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Notifications />
             <span>{user.name}</span>
             <button onClick={handleLogout} style={{
               background: '#e74c3c',

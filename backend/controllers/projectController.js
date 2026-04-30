@@ -1,5 +1,6 @@
 const Project = require('../models/Project');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // Create a new project
 const createProject = async (req, res, next) => {
@@ -115,6 +116,15 @@ const addMember = async (req, res, next) => {
     await project.save();
     await project.populate('creator');
     await project.populate('members.userId');
+
+    // Create notification for added user
+    const notification = new Notification({
+      userId: newUser._id,
+      type: 'added_to_project',
+      projectId: project._id,
+      message: `You have been added to project "${project.name}"`
+    });
+    await notification.save();
 
     res.json(project);
   } catch (error) {

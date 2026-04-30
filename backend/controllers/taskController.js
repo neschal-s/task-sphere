@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const Project = require('../models/Project');
+const Notification = require('../models/Notification');
 
 // Create a new task
 const createTask = async (req, res, next) => {
@@ -32,6 +33,21 @@ const createTask = async (req, res, next) => {
     await task.save();
     await task.populate('assignedTo');
     await task.populate('createdBy');
+
+    // Create notifications for all project members (except creator)
+    const projectMembers = project.members.map(m => m.userId.toString());
+    for (const memberId of projectMembers) {
+      if (memberId !== userId) {
+        const notification = new Notification({
+          userId: memberId,
+          type: 'new_task',
+          projectId: projectId,
+          taskId: task._id,
+          message: `New task "${task.title}" added to project "${project.name}"`
+        });
+        await notification.save();
+      }
+    }
 
     res.status(201).json(task);
   } catch (error) {
