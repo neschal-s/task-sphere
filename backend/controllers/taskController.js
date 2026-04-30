@@ -81,6 +81,14 @@ const getTasksByProject = async (req, res, next) => {
       .populate('assignedTo')
       .populate('createdBy');
 
+    // Manually populate pendingStatusChange.requestedBy for each task
+    for (const task of tasks) {
+      if (task.pendingStatusChange && task.pendingStatusChange.requestedBy) {
+        const User = require('../models/User');
+        task.pendingStatusChange.requestedBy = await User.findById(task.pendingStatusChange.requestedBy);
+      }
+    }
+
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -96,6 +104,14 @@ const getMyTasks = async (req, res, next) => {
       .populate('assignedTo')
       .populate('createdBy')
       .populate('projectId');
+
+    // Manually populate pendingStatusChange.requestedBy for each task
+    for (const task of tasks) {
+      if (task.pendingStatusChange && task.pendingStatusChange.requestedBy) {
+        const User = require('../models/User');
+        task.pendingStatusChange.requestedBy = await User.findById(task.pendingStatusChange.requestedBy);
+      }
+    }
 
     res.json(tasks);
   } catch (error) {
@@ -139,7 +155,12 @@ const updateTask = async (req, res, next) => {
     await task.save();
     await task.populate('assignedTo');
     await task.populate('createdBy');
-    await task.populate('pendingStatusChange.requestedBy');
+    
+    // Manually populate pendingStatusChange.requestedBy
+    if (task.pendingStatusChange && task.pendingStatusChange.requestedBy) {
+      const User = require('../models/User');
+      task.pendingStatusChange.requestedBy = await User.findById(task.pendingStatusChange.requestedBy);
+    }
 
     res.json(task);
   } catch (error) {
@@ -179,10 +200,14 @@ const requestStatusChange = async (req, res, next) => {
     };
 
     await task.save();
-    await task.populate('requestedBy', 'name email');
     await task.populate('assignedTo');
     await task.populate('createdBy');
-    await task.populate('pendingStatusChange.requestedBy');
+    
+    // Manually populate pendingStatusChange.requestedBy
+    if (task.pendingStatusChange && task.pendingStatusChange.requestedBy) {
+      const User = require('../models/User');
+      task.pendingStatusChange.requestedBy = await User.findById(task.pendingStatusChange.requestedBy);
+    }
 
     // Notify project admins
     const admins = project.members.filter(m => m.role === 'Admin');
@@ -265,7 +290,12 @@ const approveStatusChange = async (req, res, next) => {
 
     await task.populate('assignedTo');
     await task.populate('createdBy');
-    await task.populate('pendingStatusChange.requestedBy');
+    
+    // Manually populate pendingStatusChange.requestedBy (will be undefined after save, but we do it for consistency)
+    if (task.pendingStatusChange && task.pendingStatusChange.requestedBy) {
+      const User = require('../models/User');
+      task.pendingStatusChange.requestedBy = await User.findById(task.pendingStatusChange.requestedBy);
+    }
 
     res.json(task);
   } catch (error) {

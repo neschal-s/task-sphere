@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import axios from '../utils/axiosConfig';
 import { AuthContext } from '../context/AuthContext';
 import Layout from '../components/Layout';
+import Card from '../components/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -35,52 +38,88 @@ const Login = () => {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '400px', margin: '0 auto', marginTop: '2rem' }}>
-        <h2>Login</h2>
-        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
-            />
+      <div className="flex items-center justify-center min-h-screen -my-8">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              Welcome back
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              Sign in to your TaskSphere account
+            </p>
           </div>
-          <div style={{ marginBottom: '1rem' }}>
-            <label>Password:</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
-            />
+
+          {/* Card */}
+          <Card className="shadow-xl">
+            {error && (
+              <div className="mb-4 p-4 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+                <p className="text-rose-700 dark:text-rose-300 text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Input
+                label="Email Address"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="name@company.com"
+                floatingLabel={false}
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="••••••••"
+                floatingLabel={false}
+              />
+
+              <Button
+                type="submit"
+                disabled={loading}
+                loading={loading}
+                className="w-full"
+                size="lg"
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-slate-800 text-slate-500">or</span>
+              </div>
+            </div>
+
+            {/* Sign Up Link */}
+            <p className="text-center text-slate-600 dark:text-slate-400">
+              Don't have an account?{' '}
+              <Link to="/signup" className="font-semibold text-cyan-600 hover:text-cyan-700 transition-colors">
+                Create account
+              </Link>
+            </p>
+          </Card>
+
+          {/* Demo Credentials */}
+          <div className="mt-6 p-4 rounded-lg bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200/50 dark:border-blue-800/50 backdrop-blur-sm">
+            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-2">Demo Credentials:</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              Email: <code className="font-mono">john@example.com</code><br />
+              Password: <code className="font-mono">pass123</code>
+            </p>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '1rem'
-            }}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        <p style={{ marginTop: '1rem' }}>
-          Don't have an account? <a href="/signup">Sign up</a>
-        </p>
+        </div>
       </div>
     </Layout>
   );
