@@ -123,15 +123,18 @@ const Projects = () => {
                 {/* Members Preview */}
                 {project.members.length > 0 && (
                   <div className="flex items-center gap-1 mb-4">
-                    {project.members.slice(0, 3).map((member, idx) => (
-                      <div
-                        key={member._id}
-                        className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold"
-                        title={member.name}
-                      >
-                        {member.name.charAt(0).toUpperCase()}
-                      </div>
-                    ))}
+                    {project.members.slice(0, 3).map((member, idx) => {
+                      const memberName = member.userId?.name || member.name || 'U';
+                      return (
+                        <div
+                          key={member._id || idx}
+                          className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold"
+                          title={memberName}
+                        >
+                          {memberName.charAt(0).toUpperCase()}
+                        </div>
+                      );
+                    })}
                     {project.members.length > 3 && (
                       <div className="w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-300">
                         +{project.members.length - 3}
