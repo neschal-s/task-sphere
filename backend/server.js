@@ -27,6 +27,7 @@ app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/status-requests', require('./routes/statusRequests'));
 
 // Health check
 app.get('/api/health', (req, res) => {
