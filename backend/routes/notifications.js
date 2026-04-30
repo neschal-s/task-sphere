@@ -11,16 +11,12 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// Get all notifications
-router.get('/', getNotifications);
-
-// Get unread count
+// Specific routes first (before parameterized routes)
 router.get('/count/unread', getUnreadCount);
-
-// Mark all as read
 router.patch('/read-all', markAllAsRead);
 
-// Mark single notification as read
+// Parameterized routes
+router.get('/', getNotifications);
 router.patch('/:notificationId/read', markAsRead);
 
 module.exports = router;
