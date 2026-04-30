@@ -242,13 +242,48 @@ const ProjectDetail = () => {
                   padding: '1rem',
                   border: '1px solid #ddd',
                   borderRadius: '8px',
-                  borderLeft: `4px solid ${task.status === 'Done' ? '#27ae60' : task.status === 'In Progress' ? '#f39c12' : '#ccc'}`
+                  borderLeft: `4px solid ${task.status === 'Done' ? '#27ae60' : task.status === 'In Progress' ? '#f39c12' : '#ccc'}`,
+                  position: 'relative'
                 }}
               >
-                <h3>{task.title}</h3>
-                <p style={{ color: '#666' }}>{task.description}</p>
-                <div style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                  <p>Status: <strong>{task.status}</strong></p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <h3 style={{ margin: '0 0 0.5rem 0' }}>{task.title}</h3>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDeleteTask(task._id)}
+                      style={{
+                        background: '#e74c3c',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '0.25rem 0.5rem',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+                <p style={{ color: '#666', marginBottom: '0.5rem' }}>{task.description}</p>
+                <div style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    <label>Status: </label>
+                    <select
+                      value={task.status}
+                      onChange={(e) => handleUpdateTaskStatus(task._id, e.target.value)}
+                      style={{
+                        padding: '0.25rem',
+                        marginLeft: '0.5rem',
+                        borderRadius: '4px',
+                        border: '1px solid #ddd'
+                      }}
+                    >
+                      <option>To Do</option>
+                      <option>In Progress</option>
+                      <option>Done</option>
+                    </select>
+                  </div>
                   <p>Priority: <strong>{task.priority}</strong></p>
                   {task.dueDate && <p>Due: {new Date(task.dueDate).toLocaleDateString()}</p>}
                   {task.assignedTo && <p>Assigned to: {task.assignedTo.name}</p>}
