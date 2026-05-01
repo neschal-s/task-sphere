@@ -64,7 +64,7 @@ const Chat = ({ projectId }) => {
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50/50 to-blue-50/50 dark:from-slate-800 dark:to-slate-700">
         <h3 className="font-bold text-lg text-slate-900 dark:text-white">
-          💬 Project Chat
+          Project Chat
         </h3>
       </div>
 
@@ -74,7 +74,6 @@ const Chat = ({ projectId }) => {
           <Skeleton count={3} height="h-16" className="mb-3" />
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="text-4xl mb-2">💬</div>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               No messages yet. Start the conversation!
             </p>

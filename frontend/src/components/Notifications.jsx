@@ -59,12 +59,12 @@ const Notifications = () => {
 
   const getNotificationStyles = (type) => {
     const styles = {
-      added_to_project: { icon: '👥', bg: 'from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20', border: 'border-blue-200/50 dark:border-blue-800/30' },
-      new_task: { icon: '✅', bg: 'from-emerald-50/50 to-cyan-50/50 dark:from-emerald-900/20 dark:to-cyan-900/20', border: 'border-emerald-200/50 dark:border-emerald-800/30' },
-      task_updated: { icon: '📝', bg: 'from-orange-50/50 to-amber-50/50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/50 dark:border-orange-800/30' },
-      status_change_request: { icon: '⏳', bg: 'from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/50 dark:border-amber-800/30' },
+      added_to_project: { icon: '+', bg: 'from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20', border: 'border-blue-200/50 dark:border-blue-800/30' },
+      new_task: { icon: '✓', bg: 'from-emerald-50/50 to-cyan-50/50 dark:from-emerald-900/20 dark:to-cyan-900/20', border: 'border-emerald-200/50 dark:border-emerald-800/30' },
+      task_updated: { icon: '•', bg: 'from-orange-50/50 to-amber-50/50 dark:from-orange-900/20 dark:to-amber-900/20', border: 'border-orange-200/50 dark:border-orange-800/30' },
+      status_change_request: { icon: '⟳', bg: 'from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/50 dark:border-amber-800/30' },
       status_change_approved: { icon: '✓', bg: 'from-emerald-50/50 to-green-50/50 dark:from-emerald-900/20 dark:to-green-900/20', border: 'border-emerald-200/50 dark:border-emerald-800/30' },
-      status_change_rejected: { icon: '✗', bg: 'from-rose-50/50 to-red-50/50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/50 dark:border-rose-800/30' }
+      status_change_rejected: { icon: '✕', bg: 'from-rose-50/50 to-red-50/50 dark:from-rose-900/20 dark:to-red-900/20', border: 'border-rose-200/50 dark:border-rose-800/30' }
     };
     return styles[type] || styles.new_task;
   };
@@ -85,7 +85,7 @@ const Notifications = () => {
       </button>
 
       {showDropdown && (
-        <div className="absolute top-full right-0 mt-2 w-96 max-h-96 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl border border-white/20 dark:border-slate-700/30 shadow-2xl z-50 overflow-hidden flex flex-col">
+        <div className="absolute top-full right-0 mt-2 w-96 max-h-96 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-700/30 shadow-2xl z-50 overflow-hidden flex flex-col">
           {/* Header */}
           <div className="sticky top-0 px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm flex justify-between items-center">
             <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
@@ -103,7 +103,6 @@ const Notifications = () => {
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-6">
-                <div className="text-4xl mb-2">📭</div>
                 <p className="text-sm text-slate-600 dark:text-slate-400">No notifications yet</p>
               </div>
             ) : (

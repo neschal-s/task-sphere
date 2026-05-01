@@ -16,11 +16,10 @@ const Input = ({
 
   const baseStyles = `
     w-full px-4 py-3 rounded-lg
-    bg-slate-50/50 border-2 border-slate-200
+    bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-600
     transition-all duration-300
-    focus:bg-white focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200/50
-    disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500
-    dark:bg-slate-800/50 dark:border-slate-600 dark:focus:bg-slate-800
+    focus:bg-white dark:focus:bg-slate-800 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200/50 dark:focus:ring-cyan-600/30
+    disabled:bg-slate-100 dark:disabled:bg-slate-700/50 disabled:cursor-not-allowed disabled:text-slate-500 dark:disabled:text-slate-400
   `;
 
   const errorStyles = error ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200/50' : '';

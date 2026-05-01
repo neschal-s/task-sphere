@@ -13,11 +13,11 @@ const Button = ({
 
   const variants = {
     primary: 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white hover:shadow-lg hover:scale-105 active:scale-95',
-    secondary: 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-900 hover:shadow-md hover:scale-105 active:scale-95',
+    secondary: 'bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 text-slate-900 dark:text-white hover:shadow-md hover:scale-105 active:scale-95',
     danger: 'bg-gradient-to-r from-rose-400 to-pink-500 text-white hover:shadow-lg hover:scale-105 active:scale-95',
     success: 'bg-gradient-to-r from-emerald-400 to-cyan-500 text-white hover:shadow-lg hover:scale-105 active:scale-95',
-    ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-200',
-    outline: 'border-2 border-cyan-400 text-cyan-600 hover:bg-cyan-50 active:bg-cyan-100'
+    ghost: 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600',
+    outline: 'border-2 border-cyan-400 text-cyan-600 dark:border-cyan-500 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 active:bg-cyan-100 dark:active:bg-cyan-900/40'
   };
 
   const sizes = {

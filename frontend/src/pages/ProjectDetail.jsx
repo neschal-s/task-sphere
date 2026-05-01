@@ -444,7 +444,7 @@ const ProjectDetail = () => {
             <div className="space-y-6">
               {!showAddMember && isAdmin && (
                 <Button onClick={() => setShowAddMember(true)} size="lg">
-                  ➕ Add Member
+                  Add Member
                 </Button>
               )}
 
