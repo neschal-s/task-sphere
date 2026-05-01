@@ -54,7 +54,7 @@ const Login = () => {
 
       {/* Header */}
       <div className={`absolute top-8 left-8 flex items-center gap-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-        <span className="font-bold text-xl">TaskSphere</span>
+        <span className="font-light text-3xl">TaskSphere</span>
       </div>
 
       {/* Theme Toggle */}
@@ -71,7 +71,15 @@ const Login = () => {
       </button>
 
       {/* Main Card */}
-      <div className="relative z-10 w-full max-w-md">
+      
+      <div className="relative z-10 w-full max-w-md text-center">
+        <div className="mb-10">
+          <h1 className={`text-4xl font-light mb-4 ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}>
+            Your All-in-one Workspace for Projects, Tasks, and Team collaboration
+          </h1>
+       </div>
         <div className={`rounded-2xl transition-all duration-300 ${
           isDark
             ? 'border border-cyan-500/30 bg-slate-900/50'
@@ -88,7 +96,7 @@ const Login = () => {
 
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <h1 className={`text-3xl font-light mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               Welcome back
             </h1>
             <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>

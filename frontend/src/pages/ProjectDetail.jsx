@@ -19,9 +19,15 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, is
   };
 
   const priorityColors = {
-    'High': 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300',
-    'Medium': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    'Low': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+    'High': isDark
+  ? 'bg-rose-900/30 text-rose-300'
+  : 'bg-rose-100 text-rose-700',
+    'Medium': isDark
+  ? 'bg-rose-900/30 text-rose-300'
+  : 'bg-rose-100 text-rose-700',
+    'Low': isDark
+  ? 'bg-rose-900/30 text-rose-300'
+  : 'bg-rose-100 text-rose-700'
   };
 
   return (
@@ -31,10 +37,10 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, is
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
+          <h3 className="text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'} mb-1">
             {task.title}
           </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+          <p className="text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'} line-clamp-2">
             {task.description}
           </p>
         </div>
@@ -53,7 +59,7 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, is
       </div>
 
       {/* Status & Priority */}
-      <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
+      <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b ${isDark ? 'border-slate-700/50' : 'border-slate-200/50'}">
         <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${statusColors[task.status]} ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {task.status}
         </div>
@@ -283,17 +289,20 @@ const ProjectDetail = () => {
       <div className="space-y-8">
         {/* Project Header */}
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
+          <h1 className="text-4xl font-bold ${isdark?'text-white':'text-slate-900'} mb-2">
             {project.name}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-lg">
+          <p className=" ${isdark?'text-slate-400':'text-slate-600'} text-lg">
             {project.description}
           </p>
         </div>
 
         {error && (
-          <div className="p-4 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
-            <p className="text-rose-700 dark:text-rose-300 text-sm font-medium">{error}</p>
+          <div className="p-4 rounded-lg ${isDark 
+  ? 'bg-rose-900/20 border-rose-800 text-rose-300'
+  : 'bg-rose-50 border-rose-200 text-rose-700'
+}">
+            <p className="text-sm font-medium">{error}</p>
           </div>
         )}
 
@@ -355,7 +364,7 @@ const ProjectDetail = () => {
                       floatingLabel={false}
                     />
                     <div>
-                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                      <label className="block text-sm font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} mb-2">
                         Description
                       </label>
                       <textarea
@@ -375,7 +384,7 @@ const ProjectDetail = () => {
                         floatingLabel={false}
                       />
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        <label className="block text-sm font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'} mb-2">
                           Priority
                         </label>
                         <select
