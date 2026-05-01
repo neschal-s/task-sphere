@@ -114,7 +114,7 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, is
               isDark
                 ? 'bg-slate-700/50 border-slate-600/50 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'
                 : 'bg-slate-50/50 border-slate-200/50 text-slate-900 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50'
-            }`
+            }`}
           >
             <option value="">Request Status Change</option>
             <option value="To Do">To Do</option>
@@ -312,15 +312,6 @@ const ProjectDetail = () => {
               {tab === 'tasks' && 'Tasks'}
               {tab === 'members' && `Members (${project.members.length})`}
               {tab === 'chat' && 'Chat'}
-            </button>
-          ))}
-        </div>
-                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-              }`}
-            >
-              {tab === 'tasks' && `📋 Tasks (${tasks.length})`}
-              {tab === 'members' && `👥 Members (${project.members.length})`}
-              {tab === 'chat' && '💬 Chat'}
             </button>
           ))}
         </div>
