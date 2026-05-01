@@ -156,19 +156,4 @@ const CreateProject = () => {
 };
 
 export default CreateProject;
-            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 text-center">
-              <button
-                onClick={() => navigate('/projects')}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
-              >
-                ← Back to Projects
-              </button>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </Layout>
-  );
-};
 
-export default CreateProject;
