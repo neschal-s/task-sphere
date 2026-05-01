@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../utils/axiosConfig';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 import Layout from '../components/Layout';
 import Chat from '../components/Chat';
 import Card from '../components/Card';
@@ -10,11 +11,11 @@ import Input from '../components/Input';
 import Skeleton from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 
-const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) => {
+const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, isDark }) => {
   const statusColors = {
-    'Done': 'from-emerald-500/20 to-cyan-500/20 border-emerald-200/50 text-emerald-700',
-    'In Progress': 'from-orange-500/20 to-amber-500/20 border-orange-200/50 text-orange-700',
-    'To Do': 'from-blue-500/20 to-cyan-500/20 border-blue-200/50 text-blue-700'
+    'Done': isDark ? 'from-emerald-500/10 to-cyan-500/10 border-emerald-500/30' : 'from-emerald-100/50 to-cyan-100/50 border-emerald-200/50',
+    'In Progress': isDark ? 'from-orange-500/10 to-amber-500/10 border-orange-500/30' : 'from-orange-100/50 to-amber-100/50 border-orange-200/50',
+    'To Do': isDark ? 'from-blue-500/10 to-cyan-500/10 border-blue-500/30' : 'from-blue-100/50 to-cyan-100/50 border-blue-200/50'
   };
 
   const priorityColors = {
@@ -38,20 +39,22 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) 
           </p>
         </div>
         {isAdmin && (
-          <Button
-            variant="danger"
-            size="sm"
+          <button
             onClick={() => onDelete(task._id)}
-            className="ml-2"
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              isDark
+                ? 'bg-rose-900/30 text-rose-300 hover:bg-rose-900/50'
+                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+            }`}
           >
-            🗑️
-          </Button>
+            Delete
+          </button>
         )}
       </div>
 
       {/* Status & Priority */}
       <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
-        <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${statusColors[task.status]}`}>
+        <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${statusColors[task.status]} ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {task.status}
         </div>
         <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${priorityColors[task.priority]}`}>
@@ -62,8 +65,8 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) 
       {/* Details */}
       <div className="space-y-2 mb-4 text-sm">
         {task.dueDate && (
-          <p className="text-slate-600 dark:text-slate-400">
-            📅 Due: {new Date(task.dueDate).toLocaleDateString('en-US', {
+          <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+            Due: {new Date(task.dueDate).toLocaleDateString('en-US', {
               weekday: 'short',
               month: 'short',
               day: 'numeric'
@@ -71,22 +74,28 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) 
           </p>
         )}
         {task.assignedTo && (
-          <p className="text-slate-600 dark:text-slate-400">
-            👤 Assigned to: <strong>{task.assignedTo.name}</strong>
+          <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>
+            Assigned to: <strong>{task.assignedTo.name}</strong>
           </p>
         )}
       </div>
 
       {/* Status Control */}
       <div className="mb-4">
-        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-2">
+        <label className={`text-xs font-semibold block mb-2 ${
+          isDark ? 'text-slate-300' : 'text-slate-700'
+        }`}>
           {isAdmin ? 'Update Status' : 'Request Status Change'}
         </label>
         {isAdmin ? (
           <select
             value={task.status}
             onChange={(e) => onStatusChange(task._id, e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-600 focus:border-cyan-400 dark:focus:border-cyan-400 text-sm font-medium focus:outline-none transition-colors"
+            className={`w-full px-3 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none transition-colors ${
+              isDark
+                ? 'bg-slate-700/50 border-slate-600/50 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'
+                : 'bg-slate-50/50 border-slate-200/50 text-slate-900 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50'
+            }`}
           >
             <option>To Do</option>
             <option>In Progress</option>
@@ -101,7 +110,11 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) 
                 e.target.value = '';
               }
             }}
-            className="w-full px-3 py-2 rounded-lg bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-600 focus:border-cyan-400 dark:focus:border-cyan-400 text-sm font-medium focus:outline-none transition-colors"
+            className={`w-full px-3 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none transition-colors ${
+              isDark
+                ? 'bg-slate-700/50 border-slate-600/50 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'
+                : 'bg-slate-50/50 border-slate-200/50 text-slate-900 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50'
+            }`
           >
             <option value="">Request Status Change</option>
             <option value="To Do">To Do</option>
@@ -113,28 +126,42 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete }) 
 
       {/* Pending Status Change */}
       {isAdmin && task.pendingStatusChange && task.pendingStatusChange.requestedBy && (
-        <div className="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-amber-200 dark:border-amber-800/50 mt-4">
-          <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">
-            ⏳ Pending Approval
+        <div className={`p-4 rounded-lg border-2 mt-4 ${
+          isDark
+            ? 'bg-amber-500/10 border-amber-500/30'
+            : 'bg-amber-50/50 border-amber-200/50'
+        }`}>
+          <p className={`text-sm font-semibold mb-2 ${
+            isDark ? 'text-amber-300' : 'text-amber-700'
+          }`}>
+            Pending Approval
           </p>
-          <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+          <p className={`text-sm mb-3 ${
+            isDark ? 'text-amber-200' : 'text-amber-800'
+          }`}>
             <strong>{task.pendingStatusChange.requestedBy.name}</strong> requested to change status to <strong>{task.pendingStatusChange.requestedStatus}</strong>
           </p>
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="success"
+            <button
               onClick={() => onApproveReject(task._id, true)}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                isDark
+                  ? 'bg-emerald-900/30 text-emerald-300 hover:bg-emerald-900/50'
+                  : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+              }`}
             >
-              ✓ Approve
-            </Button>
-            <Button
-              size="sm"
-              variant="danger"
+              Approve
+            </button>
+            <button
               onClick={() => onApproveReject(task._id, false)}
+              className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                isDark
+                  ? 'bg-rose-900/30 text-rose-300 hover:bg-rose-900/50'
+                  : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+              }`}
             >
-              ✗ Reject
-            </Button>
+              Reject
+            </button>
           </div>
         </div>
       )}
@@ -146,6 +173,7 @@ const ProjectDetail = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { isDark } = useContext(ThemeContext);
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -246,7 +274,7 @@ const ProjectDetail = () => {
   };
 
   if (loading) return <Layout><Skeleton count={3} height="h-40" className="mb-4" /></Layout>;
-  if (!project) return <Layout><EmptyState icon="❌" title="Project not found" /></Layout>;
+  if (!project) return <Layout><EmptyState title="Project not found" description="The project you're looking for doesn't exist." /></Layout>;
 
   const pendingTasks = tasks.filter(t => t.pendingStatusChange && t.pendingStatusChange.requestedBy);
 
@@ -270,14 +298,23 @@ const ProjectDetail = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
+        <div className={`flex gap-2 border-b ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
           {['tasks', 'members', 'chat'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 font-semibold transition-colors border-b-2 ${
                 activeTab === tab
-                  ? 'border-cyan-600 text-cyan-600 dark:text-cyan-400'
+                  ? isDark ? 'border-cyan-500 text-cyan-400' : 'border-blue-500 text-blue-600'
+                  : isDark ? 'border-transparent text-slate-400 hover:text-slate-300' : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {tab === 'tasks' && 'Tasks'}
+              {tab === 'members' && `Members (${project.members.length})`}
+              {tab === 'chat' && 'Chat'}
+            </button>
+          ))}
+        </div>
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
@@ -295,14 +332,27 @@ const ProjectDetail = () => {
             <div className="space-y-6">
               {/* Create Task */}
               {!showCreateTask && (
-                <Button onClick={() => setShowCreateTask(true)} size="lg">
-                  ✨ Create New Task
-                </Button>
+                <button
+                  onClick={() => setShowCreateTask(true)}
+                  className={`w-full px-6 py-3 rounded-lg font-semibold transition-all active:scale-95 ${
+                    isDark
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-500/50'
+                      : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-400/50'
+                  }`}
+                >
+                  Create New Task
+                </button>
               )}
 
               {showCreateTask && (
-                <Card className="bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Create New Task</h3>
+                <div className={`rounded-2xl p-6 border transition-all ${
+                  isDark
+                    ? 'bg-slate-800/50 border-slate-700/30'
+                    : 'bg-white/50 border-blue-200/30'
+                } backdrop-blur-sm`}>
+                  <h3 className={`text-xl font-bold mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    Create New Task
+                  </h3>
                   <form onSubmit={handleCreateTask} className="space-y-4">
                     <Input
                       label="Task Title"
@@ -353,25 +403,28 @@ const ProjectDetail = () => {
                       <Button variant="ghost" onClick={() => setShowCreateTask(false)} className="flex-1">Cancel</Button>
                     </div>
                   </form>
-                </Card>
+                </div>
               )}
 
               {/* Pending Approvals */}
               {isAdmin && pendingTasks.length > 0 && (
-                <Card className="bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-200 dark:border-amber-800/50">
-                  <h3 className="text-lg font-bold text-amber-900 dark:text-amber-100 mb-4">
-                    ⏳ {pendingTasks.length} Pending Approval{pendingTasks.length > 1 ? 's' : ''}
+                <div className={`rounded-2xl p-6 border-2 transition-all ${
+                  isDark
+                    ? 'bg-amber-500/10 border-amber-500/30'
+                    : 'bg-amber-50/50 border-amber-200/50'
+                }`}>
+                  <h3 className={`text-lg font-bold mb-4 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
+                    {pendingTasks.length} Pending Approval{pendingTasks.length > 1 ? 's' : ''}
                   </h3>
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <p className={`text-sm ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>
                     Review and approve status change requests from your team members.
                   </p>
-                </Card>
+                </div>
               )}
 
               {/* Tasks Grid */}
               {tasks.length === 0 ? (
                 <EmptyState
-                  icon="📋"
                   title="No tasks yet"
                   description="Create your first task to get started"
                   action={() => setShowCreateTask(true)}
@@ -387,6 +440,7 @@ const ProjectDetail = () => {
                       onStatusChange={handleUpdateTaskStatus}
                       onApproveReject={handleApproveStatusChange}
                       onDelete={handleDeleteTask}
+                      isDark={isDark}
                     />
                   ))}
                 </div>
