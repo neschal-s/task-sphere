@@ -26,7 +26,7 @@ const TaskCard = ({ task, isAdmin, onStatusChange, onApproveReject, onDelete, is
 
   return (
     <Card
-      className={`${task.pendingStatusChange ? 'ring-2 ring-amber-400/50 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20' : ''}`}
+      className={`${task.pendingStatusChange ? 'ring-2 ring-amber-400/50 bg-linear-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20' : ''}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -327,8 +327,8 @@ const ProjectDetail = () => {
                   onClick={() => setShowCreateTask(true)}
                   className={`w-full px-6 py-3 rounded-lg font-semibold transition-all active:scale-95 ${
                     isDark
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-500/50'
-                      : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-400/50'
+                      ? 'bg-linear-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-500/50'
+                      : 'bg-linear-to-r from-blue-400 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-400/50'
                   }`}
                 >
                   Create New Task
@@ -449,8 +449,8 @@ const ProjectDetail = () => {
               )}
 
               {showAddMember && (
-                <Card className="bg-gradient-to-br from-cyan-50/50 to-blue-50/50 dark:from-cyan-900/20 dark:to-blue-900/20">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Add Team Member</h3>
+                <Card className={`bg-linear-to-br ${isDark ? 'from-cyan-900/20 to-blue-900/20 border-slate-700/30' : 'from-cyan-50/70 to-blue-50/70 border-slate-200/70'}`}>
+                  <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Add Team Member</h3>
                   <form onSubmit={handleAddMember} className="flex flex-col sm:flex-row gap-3">
                     <Input
                       label="Email Address"
@@ -472,14 +472,14 @@ const ProjectDetail = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {project.members.map(m => (
-                  <Card key={m.userId._id} className="hover:shadow-lg">
+                  <Card key={m.userId._id} className={`${isDark ? 'bg-slate-800/50 border-slate-700/30 hover:shadow-lg' : 'bg-white/70 border-slate-200/70 hover:shadow-lg'}`}>
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-lg">
+                      <div className="w-12 h-12 rounded-full bg-linear-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-lg">
                         {m.userId.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-slate-900 dark:text-white">{m.userId.name}</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">{m.userId.email}</p>
+                        <h4 className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{m.userId.name}</h4>
+                        <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{m.userId.email}</p>
                       </div>
                       <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                         m.role === 'Admin'

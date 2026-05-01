@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from '../utils/axiosConfig';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 import Card from './Card';
 import Skeleton from './Skeleton';
 
 const Chat = ({ projectId }) => {
   const { user } = useContext(AuthContext);
+  const { isDark } = useContext(ThemeContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,21 +62,21 @@ const Chat = ({ projectId }) => {
   };
 
   return (
-    <Card className="bg-white/60 dark:bg-slate-800/60 p-0 overflow-hidden flex flex-col h-96">
+    <Card className={`p-0 overflow-hidden flex flex-col h-96 ${isDark ? 'bg-slate-800/60' : 'bg-white/70 border-slate-200/70'}`}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50/50 to-blue-50/50 dark:from-slate-800 dark:to-slate-700">
-        <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+      <div className={`px-6 py-4 border-b ${isDark ? 'border-slate-700/50 bg-linear-to-r from-slate-800 to-slate-700' : 'border-slate-200/70 bg-linear-to-r from-white to-blue-50/70'}`}>
+        <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Project Chat
         </h3>
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-transparent to-slate-50/50 dark:to-slate-800/50">
+      <div className={`flex-1 overflow-y-auto p-6 space-y-4 bg-linear-to-b from-transparent ${isDark ? 'to-slate-800/50' : 'to-blue-50/40'}`}>
         {loading ? (
           <Skeleton count={3} height="h-16" className="mb-3" />
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
               No messages yet. Start the conversation!
             </p>
           </div>
@@ -88,14 +90,16 @@ const Chat = ({ projectId }) => {
                 className={`
                   max-w-xs px-4 py-3 rounded-2xl
                   ${msg.userId._id === user?.id
-                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white rounded-br-none'
-                    : 'bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-900 dark:text-white rounded-bl-none'
+                    ? 'bg-linear-to-r from-cyan-400 to-blue-500 text-white rounded-br-none'
+                    : isDark
+                      ? 'bg-linear-to-r from-slate-700 to-slate-600 text-white rounded-bl-none'
+                      : 'bg-linear-to-r from-slate-100 to-blue-100 text-slate-900 rounded-bl-none'
                   }
                   shadow-sm
                 `}
               >
                 {msg.userId._id !== user?.id && (
-                  <p className="text-xs font-bold opacity-75 mb-1">
+                  <p className={`text-xs font-bold opacity-75 mb-1 ${isDark ? 'text-white' : 'text-slate-700'}`}>
                     {msg.userId.name}
                   </p>
                 )}
@@ -103,7 +107,7 @@ const Chat = ({ projectId }) => {
                 <p className={`text-xs mt-1 ${
                   msg.userId._id === user?.id
                     ? 'text-blue-100'
-                    : 'text-slate-600 dark:text-slate-400'
+                    : isDark ? 'text-slate-400' : 'text-slate-600'
                 }`}>
                   {new Date(msg.createdAt).toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -119,7 +123,7 @@ const Chat = ({ projectId }) => {
       </div>
 
       {/* Input Form */}
-      <div className="px-6 py-4 border-t border-slate-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+      <div className={`px-6 py-4 border-t backdrop-blur-sm ${isDark ? 'border-slate-700/50 bg-slate-800/50' : 'border-slate-200/70 bg-white/70'}`}>
         <form onSubmit={handleSendMessage} className="flex gap-3">
           <input
             type="text"
@@ -127,7 +131,11 @@ const Chat = ({ projectId }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             maxLength={1000}
-            className="flex-1 px-4 py-2.5 rounded-lg bg-slate-50/50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 focus:border-cyan-400 dark:focus:border-cyan-400 focus:outline-none text-sm focus:ring-2 focus:ring-cyan-200/50 dark:focus:ring-cyan-600/30 transition-all"
+            className={`flex-1 px-4 py-2.5 rounded-lg border-2 focus:border-cyan-400 focus:outline-none text-sm focus:ring-2 transition-all ${
+              isDark
+                ? 'bg-slate-700/50 border-slate-600 text-white focus:ring-cyan-600/30'
+                : 'bg-white border-slate-200 text-slate-900 focus:ring-cyan-200/50'
+            }`}
           />
           <button
             type="submit"
